@@ -14,7 +14,12 @@ public class UserResponse {
     private Role role;
     private String funcao;   // novo
 
-    public UserResponse(User updatedUser) {
+    public UserResponse(User user) {
+        this.id = user.getId();
+        this.nome = user.getNome();
+        this.email = user.getEmail();
+        this.role = user.getRole();
+        this.funcao = user.getFuncao();
     }
 
     public static UserResponse fromUser(User user) {

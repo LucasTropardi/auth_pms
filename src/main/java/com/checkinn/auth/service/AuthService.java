@@ -8,6 +8,8 @@ import com.checkinn.auth.model.User;
 import com.checkinn.auth.repository.UserRepository;
 import com.checkinn.auth.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +25,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     public String login(String email, String password) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
+        Optional<User> optionalUser = userRepository.findByEmailAndAtivoTrue(email);
 
         if (optionalUser.isEmpty()) {
             throw new RuntimeException("Usuário não encontrado.");
@@ -49,6 +51,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole() != null ? request.getRole() : Role.USER)
                 .funcao(request.getFuncao())
+                .ativo(request.getAtivo() != null ? request.getAtivo() : true)
                 .build();
 
         return userRepository.save(user);
@@ -66,6 +69,22 @@ public class AuthService {
                 .toList();
     }
 
+    public Page<User> findUsers(String nome, String email, String role, Pageable pageable) {
+        if (nome != null && !nome.isBlank()) {
+            return userRepository.findByAtivoTrueAndNomeContainingIgnoreCase(nome, pageable);
+        }
+
+        if (email != null && !email.isBlank()) {
+            return userRepository.findByAtivoTrueAndEmailContainingIgnoreCase(email, pageable);
+        }
+
+        if (role != null && !role.isBlank()) {
+            return userRepository.findByAtivoTrueAndRole(Role.valueOf(role.toUpperCase()), pageable);
+        }
+
+        return userRepository.findByAtivoTrue(pageable);
+    }
+
     public User updateUser(Long id, UpdateUserRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
@@ -78,6 +97,9 @@ public class AuthService {
 
         if (request.password() != null && !request.password().isBlank())
             user.setPassword(passwordEncoder.encode(request.password()));
+
+        if (request.role() != null)
+            user.setRole(request.role());
 
         return userRepository.save(user);
     }

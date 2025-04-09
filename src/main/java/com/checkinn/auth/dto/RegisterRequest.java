@@ -26,4 +26,6 @@ public class RegisterRequest {
 
     @NotBlank(message = "Função é obrigatória")
     String funcao;
+
+    private Boolean ativo = true;
 }

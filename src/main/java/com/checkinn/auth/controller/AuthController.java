@@ -2,11 +2,16 @@ package com.checkinn.auth.controller;
 
 import com.checkinn.auth.dto.*;
 import com.checkinn.auth.model.User;
+import com.checkinn.auth.security.AuthenticatedUser;
 import com.checkinn.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,11 +38,18 @@ public class AuthController {
 
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserResponse>> listUsers() {
-        return ResponseEntity.ok(authService.listAll());
+    public ResponseEntity<Page<UserResponse>> listUsers(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String role,
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+
+        Page<User> page = authService.findUsers(nome, email, role, pageable);
+        return ResponseEntity.ok(page.map(UserResponse::new));
     }
 
     @PutMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<UserResponse> updateUser(
             @PathVariable Long id,
             @Valid @RequestBody UpdateUserRequest request) {
@@ -47,13 +59,16 @@ public class AuthController {
     }
 
     @DeleteMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         authService.softDeleteUser(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> me(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(new UserResponse(user));
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    public ResponseEntity<UserResponse> me(@AuthenticationPrincipal AuthenticatedUser authUser) {
+        return ResponseEntity.ok(new UserResponse(authUser.getUser()));
     }
+
 }

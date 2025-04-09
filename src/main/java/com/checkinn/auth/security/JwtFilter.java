@@ -1,5 +1,7 @@
 package com.checkinn.auth.security;
 
+import com.checkinn.auth.model.User;
+import com.checkinn.auth.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -7,22 +9,24 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.security.Key;
-import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
     @Value("${jwt.secret}")
     private String jwtSecret;
+
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -42,14 +46,17 @@ public class JwtFilter extends OncePerRequestFilter {
                         .parseClaimsJws(token)
                         .getBody();
 
-                String userId = claims.getSubject();
                 String email = claims.get("email", String.class);
-                String role = claims.get("role", String.class);
+
+                User user = userRepository.findByEmailAndAtivoTrue(email)
+                        .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+                AuthenticatedUser authenticatedUser = new AuthenticatedUser(user);
 
                 var auth = new UsernamePasswordAuthenticationToken(
-                        email, // principal
+                        authenticatedUser,
                         null,
-                        List.of(new SimpleGrantedAuthority("ROLE_" + role)) // Spring exige prefixo "ROLE_"
+                        authenticatedUser.getAuthorities()
                 );
 
                 SecurityContextHolder.getContext().setAuthentication(auth);

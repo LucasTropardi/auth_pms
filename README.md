@@ -1,4 +1,4 @@
-# Auth Service - Checkinn PMS
+# Auth Service - CheckInn PMS
 
 Welcome to the **Auth Service** module of the CheckInn Property Management System (PMS) project. This is a **Spring Boot microservice** responsible for **user authentication and management**, including registration, login, profile updates, soft deletion, and JWT token generation. It is designed to be **stateless**, secure, and scalable for hotel system needs.
 
@@ -142,6 +142,4 @@ This project is for **educational purposes only**, part of a hotel management sy
 - End-to-end tests with Testcontainers or MockMvc
 
 ---
-
-Made with ❤️ for the Checkinn PMS educational project.
 

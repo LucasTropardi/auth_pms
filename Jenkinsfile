@@ -15,7 +15,10 @@ pipeline {
 
         stage('Build Maven') {
             steps {
-                sh './mvnw clean package -Pproduction -DskipTests'
+                sh '''
+                    chmod +x mvnw
+                    ./mvnw clean package -Pproduction -DskipTests
+                '''
             }
         }
 

@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "auth-service"
+        CONTAINER_NAME = "auth-service-container"
+    }
+
+    stages {
+        stage('Clone') {
+            steps {
+                git credentialsId: 'github', url: 'https://github.com/LucasTropardi/auth_pms.git'
+            }
+        }
+
+        stage('Build Maven') {
+            steps {
+                sh './mvnw clean package -Pproduction -DskipTests'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $DOCKER_IMAGE .'
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                sh '''
+                    docker stop $CONTAINER_NAME || true
+                    docker rm $CONTAINER_NAME || true
+                    docker run -d --name $CONTAINER_NAME -p 8080:8080 $DOCKER_IMAGE
+                '''
+            }
+        }
+    }
+}

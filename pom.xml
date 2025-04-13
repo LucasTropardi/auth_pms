@@ -150,4 +150,13 @@
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>production</id>
+			<properties>
+				<!-- definir variáveis específicas para produção -->
+				<env>production</env>
+			</properties>
+		</profile>
+	</profiles>
 </project>

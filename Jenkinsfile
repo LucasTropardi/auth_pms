@@ -33,7 +33,7 @@ pipeline {
                 sh '''
                     docker stop $CONTAINER_NAME || true
                     docker rm $CONTAINER_NAME || true
-                    docker run -d --name $CONTAINER_NAME -p 8080:8080 $DOCKER_IMAGE
+                    docker run -d --name $CONTAINER_NAME -p 8040:8080 $DOCKER_IMAGE
                 '''
             }
         }

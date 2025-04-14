@@ -3,7 +3,9 @@ package com.checkinn.auth.controller;
 import com.checkinn.auth.dto.*;
 import com.checkinn.auth.model.Role;
 import com.checkinn.auth.model.User;
+import com.checkinn.auth.repository.UserRepository;
 import com.checkinn.auth.security.AuthenticatedUser;
+import com.checkinn.auth.security.JwtUtil;
 import com.checkinn.auth.service.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,8 +21,11 @@ class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
-        authService = mock(AuthService.class);
-        authController = new AuthController(authService);
+        authController = new AuthController(
+                mock(AuthService.class),
+                mock(JwtUtil.class),
+                mock(UserRepository.class)
+        );
     }
 
     @Test

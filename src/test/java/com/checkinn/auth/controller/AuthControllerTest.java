@@ -18,14 +18,16 @@ class AuthControllerTest {
 
     private AuthController authController;
     private AuthService authService;
+    private JwtUtil jwtUtil;
+    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
-        authController = new AuthController(
-                mock(AuthService.class),
-                mock(JwtUtil.class),
-                mock(UserRepository.class)
-        );
+        authService = mock(AuthService.class);
+        jwtUtil = mock(JwtUtil.class);
+        userRepository = mock(UserRepository.class);
+
+        authController = new AuthController(authService, jwtUtil, userRepository);
     }
 
     @Test
